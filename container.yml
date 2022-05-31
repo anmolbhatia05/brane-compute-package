@@ -1,0 +1,78 @@
+name: compute_ml
+version: 1.0.1
+kind: ecu
+
+dependencies:
+   - python3
+   - python3-pip
+   - python3-yaml
+
+install:
+  - pip3 install pandas scikit-learn numpy
+
+entrypoint:
+  kind: task
+  exec: compute.py
+
+files:
+  - compute.py
+
+actions:
+  read:
+    command:
+      args:
+      - read
+    input:
+    # Note: we now have two inputs for the write() function
+    - name: name
+      type: string
+    output:
+    # Note: its output is an integer!
+    - name: code
+      type: integer
+  
+  nullwrite:
+    command:
+      args:
+      - nullwrite
+    input:
+    # Note: we now have two inputs for the write() function
+    - name: name
+      type: string
+    output:
+    # Note: its output is an integer!
+    - name: code
+      type: integer
+  
+
+  preprocess:
+    command:
+      args:
+      - preprocess
+    input:
+    # Note: we now have two inputs for the write() function
+    - name: name
+      type: string
+    - name: isTrain
+      type: integer
+    output:
+    # Note: its output is an integer!
+    - name: code
+      type: integer
+
+  model:
+    command:
+      args:
+      - modelling
+    input:
+    # Note: we now have two inputs for the write() function
+    - name: name_train
+      type: string
+    - name: name_test
+      type: string
+    - name: mode
+      type: string
+    output:
+    # Note: its output is an integer!
+    - name: code
+      type: integer
