@@ -1,5 +1,5 @@
 name: compute_ml
-version: 1.0.1
+version: 1.0.0
 kind: ecu
 
 dependencies:
@@ -27,23 +27,8 @@ actions:
     - name: name
       type: string
     output:
-    # Note: its output is an integer!
-    - name: code
-      type: integer
-  
-  nullwrite:
-    command:
-      args:
-      - nullwrite
-    input:
-    # Note: we now have two inputs for the write() function
-    - name: name
+    - name: shape
       type: string
-    output:
-    # Note: its output is an integer!
-    - name: code
-      type: integer
-  
 
   preprocess:
     command:
@@ -76,3 +61,17 @@ actions:
     # Note: its output is an integer!
     - name: code
       type: integer
+  accuracy:
+    command:
+      args:
+      - accuracy
+    input:
+    # Note: we now have two inputs for the write() function
+    - name: ntrain
+      type: string
+    - name: mode
+      type: string
+    output:
+    # Note: its output is an integer!
+    - name: code
+      type: string

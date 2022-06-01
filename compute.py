@@ -9,33 +9,25 @@ import sklearn
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-# from xgboost import XGBClassifier
 from sklearn.naive_bayes import BernoulliNB
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 
 # define function to read file and return data size
 
 
-def read_file(name: str) -> int:
+def read_file(name: str) -> str:
     try:
-        df = pd.read_csv(f"/data/{name}.csv")
-        return 0
+        df = pd.read_csv(name)
+        shape = "Shape is:" + str(df.shape)
+        return shape
     except IOError as e:
-        return e.errno
+        return str(e.errno)
 
 
-def get_df(path):
-    df = pd.read_csv(path)
+def get_df(name: str):
+    df = pd.read_csv(name)
     return df
-
-
-def find_missing_values(name: str) -> int:
-    df = get_df(name)
-    count = df.isna().sum()
-    try:
-        count.to_csv("/data/dataNull.csv")
-        return 0
-    except IOError as e:
-        return e.errno
 
 
 def name_proc(df):
@@ -89,7 +81,6 @@ def missingAge(df):
                 df.Pclass == j+1), 'Age'] = guess_ages[i, j]
     df['Age'] = df['Age'].astype(int)
     df['AgeBand'] = pd.cut(df['Age'], 5)
-    # df[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean().sort_values(by='AgeBand', ascending=True)
     df.loc[df['Age'] <= 16, 'Age'] = 0
     df.loc[(df['Age'] > 16) & (df['Age'] <= 32), 'Age'] = 1
     df.loc[(df['Age'] > 32) & (df['Age'] <= 48), 'Age'] = 2
@@ -119,11 +110,9 @@ def preprocessing(name: str, isTrain: int) -> int:
         data['IsAlone'] = 0
         data.loc[data['FamilySize'] > 1, 'IsAlone'] = 1
     if(isTrain):
-        # temp = df['Survived']
         df = df.drop(['Cabin', 'Ticket', 'Name', 'AgeBand',
                      'SibSp', 'Parch', 'FamilySize'], axis='columns')
     else:
-        # temp = df['PassengerId']
         df = df.drop(['Name', 'Ticket', 'Cabin', 'AgeBand',
                      'SibSp', 'Parch', 'FamilySize'], axis='columns')
 
@@ -144,18 +133,7 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
     y_train = df_train['Survived']
     x_train = df_train.drop('Survived', axis='columns')
 
-    if(mode == 'dtc'):
-        dtc_model = DecisionTreeClassifier()
-    # Random Forest
-    elif(mode == 'rfc'):
-        model = RandomForestClassifier()
-    # XGBoost
-    # elif(mode=='xgb'):
-    #     model = XGBClassifier()
-    # BernoulliNB
-    elif(mode == 'bnb'):
-        model = BernoulliNB()
-
+    model = get_model(mode)
     model.fit(x_train, y_train)
 
     x_test = get_df(name_test)
@@ -175,17 +153,30 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
         return e.errno
 
 
-# def test_pred(name: str):
-#     #Preprocess testing dataset
+def get_model(name):
+    if(name == 'dtc'):
+        model = DecisionTreeClassifier()
+    elif(name == 'rfc'):
+        model = RandomForestClassifier(n_estimators=200, bootstrap=True, criterion='entropy',
+                                       min_samples_leaf=5, min_samples_split=2, random_state=1)
+    elif(name == 'bnb'):
+        model = BernoulliNB()
+    return model
 
-#     Pid, test_data = preprocessing(test_data, 0)
-#     test_data['PassengerId'] = Pid
-#     x_test = test_data[['PassengerId', 'Pclass', 'Sex', 'Age', 'Fare', 'Embarked', 'Title', 'IsAlone']]
-#     #Predictions
-#     y_pred = model.predict(x_test)
+
+def get_model_accuracy(name_train: str, mode: str) -> str:
+    model = get_model(mode)
+    df_train = get_df(name_train)
+    y_train = df_train['Survived']
+    X_train = df_train.drop('Survived', axis='columns')
+    all_accuracies = cross_val_score(
+        estimator=model, X=X_train, y=y_train, cv=5)
+    result = str(all_accuracies.mean())
+    return result
+
+
 if __name__ == "__main__":
-
-    if len(sys.argv) != 2 or (sys.argv[1] != "nullwrite" and sys.argv[1] != "read" and sys.argv[1] != "preprocess" and sys.argv[1] != "model"):
+    if len(sys.argv) != 2 or (sys.argv[1] != "read" and sys.argv[1] != "preprocess" and sys.argv[1] != "model" and sys.argv[1] != "accuracy"):
         print(f"Usage: {sys.argv[0]} write|read")
         exit(1)
 
@@ -193,11 +184,7 @@ if __name__ == "__main__":
     command = sys.argv[1]
     if command == "read":
         # Write the file and print the error code
-        print(yaml.dump({"code": read_file(os.environ["NAME"])}))
-    elif command == "nullwrite":
-        # Read the file and print the contents
-        print(yaml.dump({"code": find_missing_values(os.environ["NAME"])}))
-
+        print(yaml.dump({"shape": read_file(os.environ["NAME"])}))
     elif command == "preprocess":
         # Read the file and print the contents
         print(yaml.dump({"code": preprocessing(
@@ -207,4 +194,7 @@ if __name__ == "__main__":
         # Read the file and print the contents
         print(yaml.dump({"code": modelling(
             os.environ["NTRAIN"], os.environ["NTEST"], os.environ["MODE"])}))
-    # Done!
+
+    elif command == "accuracy":
+        print(yaml.dump({"code": get_model_accuracy(
+            os.environ["NTRAIN"], os.environ["MODE"])}))
