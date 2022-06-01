@@ -11,6 +11,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 # from xgboost import XGBClassifier
 from sklearn.naive_bayes import BernoulliNB
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 
 # define function to read file and return data size
 
@@ -21,7 +23,7 @@ def read_file(name: str) -> int:
     except IOError as e:
         return e.errno
 
-def get_df(name):
+def get_df(path):
     df = pd.read_csv(f"/data/{name}.csv")
     return df
 
@@ -101,10 +103,8 @@ def preprocessing(name: str, isTrain: int) -> int:
         data['IsAlone'] = 0
         data.loc[data['FamilySize'] > 1, 'IsAlone'] = 1
     if(isTrain):
-        # temp = df['Survived']
         df = df.drop(['Cabin', 'Ticket', 'Name', 'AgeBand', 'SibSp', 'Parch', 'FamilySize'], axis='columns')
     else:
-        # temp = df['PassengerId']
         df = df.drop(['Name', 'Ticket', 'Cabin', 'AgeBand', 'SibSp', 'Parch', 'FamilySize'], axis='columns')
     
     try:
@@ -121,18 +121,7 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
     y_train = df_train['Survived']
     x_train = df_train.drop('Survived', axis='columns')
     
-    if(mode=='dtc'):
-        dtc_model = DecisionTreeClassifier()
-    #Random Forest
-    elif(mode=='rfc'):
-        model = RandomForestClassifier()
-    #XGBoost
-    # elif(mode=='xgb'):
-    #     model = XGBClassifier()
-    #BernoulliNB
-    elif(mode=='bnb'):
-        model = BernoulliNB()
-
+    model = get_model(mode)
     model.fit(x_train, y_train)
 
     x_test = get_df(name_test)
@@ -149,20 +138,28 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
     except IOError as e:
         return e.errno
 
+def get_model(name):
+    if(name=='dtc'):
+        dtc_model = DecisionTreeClassifier()
+    elif(name=='rfc'):
+        model = RandomForestClassifier()
+    elif(name=='bnb'):
+        model = BernoulliNB()
+    return model
+
+def get_model_accuracy(name_train: str, mode: str) -> str:
+    model = get_model(mode)
+    df_train = get_df(name_train)
+    y_train = df_train['Survived']
+    X_train = df_train.drop('Survived', axis='columns')
+    all_accuracies = cross_val_score(estimator=model, X=X_train, y=y_train, cv=5)
+    result = str(all_accuracies.mean())
+    return result
 
 
-# def test_pred(name: str):
-#     #Preprocess testing dataset
 
-#     Pid, test_data = preprocessing(test_data, 0)
-#     test_data['PassengerId'] = Pid
-#     x_test = test_data[['PassengerId', 'Pclass', 'Sex', 'Age', 'Fare', 'Embarked', 'Title', 'IsAlone']]
-#     #Predictions
-#     y_pred = model.predict(x_test)
-
-if __name__ == "__main__":
-   
-    if len(sys.argv) != 2 or (sys.argv[1] != "nullwrite" and sys.argv[1] != "read" and sys.argv[1] != "preprocess" and sys.argv[1] != "model"):
+if __name__ == "__main__":   
+    if len(sys.argv) != 2 or (sys.argv[1] != "nullwrite" and sys.argv[1] != "read" and sys.argv[1] != "preprocess" and sys.argv[1] != "model" and sys.argv[1] != "accuracy"):
         print(f"Usage: {sys.argv[0]} write|read")
         exit(1)
 
@@ -182,4 +179,6 @@ if __name__ == "__main__":
     elif command == "model":
         # Read the file and print the contents
         print(yaml.dump({ "code": modelling(os.environ["NTRAIN"], os.environ["NTEST"], os.environ["MODE"])}))    
-    # Done!
+    
+    elif command == "accuracy":
+        print(yaml.dump({ "code": get_model_accuracy(os.environ["NTRAIN"], os.environ["MODE"])}))

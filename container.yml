@@ -76,3 +76,17 @@ actions:
     # Note: its output is an integer!
     - name: code
       type: integer
+  accuracy:
+    command:
+      args:
+      - accuracy
+    input:
+    # Note: we now have two inputs for the write() function
+    - name: ntrain
+      type: string
+    - name: mode
+      type: string
+    output:
+    # Note: its output is an integer!
+    - name: code
+      type: string
