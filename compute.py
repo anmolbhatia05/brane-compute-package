@@ -5,7 +5,12 @@ import yaml
 
 import pandas as pd
 import numpy as np
+import sklearn
 
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+# from xgboost import XGBClassifier
+from sklearn.naive_bayes import BernoulliNB
 
 # define function to read file and return data size
 
@@ -114,7 +119,7 @@ def preprocessing(name: str, isTrain: int) -> int:
 def modelling(name_train: str, name_test: str, mode: str) -> int:
     df_train = get_df(name_train)
     y_train = df_train['Survived']
-    x_train = df.drop('Survived', axis='columns')
+    x_train = df_train.drop('Survived', axis='columns')
     
     if(mode=='dtc'):
         dtc_model = DecisionTreeClassifier()
@@ -122,8 +127,8 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
     elif(mode=='rfc'):
         model = RandomForestClassifier()
     #XGBoost
-    elif(mode=='xgb'):
-        model = XGBClassifier()
+    # elif(mode=='xgb'):
+    #     model = XGBClassifier()
     #BernoulliNB
     elif(mode=='bnb'):
         model = BernoulliNB()
@@ -133,26 +138,31 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
     x_test = get_df(name_test)
     y_pred = model.predict(x_test)
 
+    sample_submission = x_test.copy(deep=True)
+    sample_submission['Survived'] = y_pred
+    # sample_submission.head()
+    sample_submission.drop(sample_submission.columns.difference(['PassengerId','Survived']), 1, inplace=True)
+    
     try:
-        y_pred.to_csv("/data/prediction_" + str(mode) + ".csv")
+        sample_submission.to_csv("/data/prediction_" + str(mode) + ".csv", index= False)
         return 0
     except IOError as e:
         return e.errno
 
 
 
-def test_pred(name: str):
-    #Preprocess testing dataset
+# def test_pred(name: str):
+#     #Preprocess testing dataset
 
-    Pid, test_data = preprocessing(test_data, 0)
-    test_data['PassengerId'] = Pid
-    x_test = test_data[['PassengerId', 'Pclass', 'Sex', 'Age', 'Fare', 'Embarked', 'Title', 'IsAlone']]
-    #Predictions
-    y_pred = model.predict(x_test)
+#     Pid, test_data = preprocessing(test_data, 0)
+#     test_data['PassengerId'] = Pid
+#     x_test = test_data[['PassengerId', 'Pclass', 'Sex', 'Age', 'Fare', 'Embarked', 'Title', 'IsAlone']]
+#     #Predictions
+#     y_pred = model.predict(x_test)
 
 if __name__ == "__main__":
    
-    if len(sys.argv) != 2 or (sys.argv[1] != "nullwrite" and sys.argv[1] != "read" and sys.argv[1] != "preprocess" and sys.argv[1] != "modelling"):
+    if len(sys.argv) != 2 or (sys.argv[1] != "nullwrite" and sys.argv[1] != "read" and sys.argv[1] != "preprocess" and sys.argv[1] != "model"):
         print(f"Usage: {sys.argv[0]} write|read")
         exit(1)
 
@@ -171,5 +181,5 @@ if __name__ == "__main__":
 
     elif command == "model":
         # Read the file and print the contents
-        print(yaml.dump({ "code": modelling(os.environ["NAME_TRAIN"], os.environ["NAME_TEST"], os.environ["MODE"])}))    
+        print(yaml.dump({ "code": modelling(os.environ["NTRAIN"], os.environ["NTEST"], os.environ["MODE"])}))    
     # Done!

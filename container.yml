@@ -63,12 +63,12 @@ actions:
   model:
     command:
       args:
-      - modelling
+      - model
     input:
     # Note: we now have two inputs for the write() function
-    - name: name_train
+    - name: ntrain
       type: string
-    - name: name_test
+    - name: ntest
       type: string
     - name: mode
       type: string
