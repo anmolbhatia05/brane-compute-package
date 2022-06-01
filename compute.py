@@ -14,6 +14,7 @@ from sklearn.naive_bayes import BernoulliNB
 
 # define function to read file and return data size
 
+
 def read_file(name: str) -> int:
     try:
         df = pd.read_csv(f"/data/{name}.csv")
@@ -21,9 +22,11 @@ def read_file(name: str) -> int:
     except IOError as e:
         return e.errno
 
-def get_df(name):
-    df = pd.read_csv(f"/data/{name}.csv")
+
+def get_df(path):
+    df = pd.read_csv(path)
     return df
+
 
 def find_missing_values(name: str) -> int:
     df = get_df(name)
@@ -38,10 +41,14 @@ def find_missing_values(name: str) -> int:
 def name_proc(df):
     df['Title'] = df['Name'].apply(lambda x: x.split(','))
     df['Title'] = df['Title'].apply(lambda x: x[-1].split('.')[0].strip())
-    df['Title'] = df['Title'].replace(['the Countess','Dr','Jonkheer','Master','Mlle','Mile','Mme','Ms','Rev'],'Other')
-    df['Title'] = df['Title'].replace(['Don','Sir','Capt','Col','Lady','Major','Dona'],'Old')
+    df['Title'] = df['Title'].replace(
+        ['the Countess', 'Dr', 'Jonkheer', 'Master', 'Mlle', 'Mile', 'Mme', 'Ms', 'Rev'], 'Other')
+    df['Title'] = df['Title'].replace(
+        ['Don', 'Sir', 'Capt', 'Col', 'Lady', 'Major', 'Dona'], 'Old')
     return df
 # Remove missing values
+
+
 def remove_missing(df):
     df['Embarked'].fillna('S', inplace=True)
     df['Fare'].fillna(df['Fare'].median(), inplace=True)
@@ -51,28 +58,35 @@ def remove_missing(df):
     df['Parch'].fillna(value=0, inplace=True)
     return df
 # Change categorical data to numerical data
+
+
 def cat_to_num(df):
-    df['Sex'].replace('female',0 ,inplace=True)
-    df['Sex'].replace('male',1 ,inplace=True)
+    df['Sex'].replace('female', 0, inplace=True)
+    df['Sex'].replace('male', 1, inplace=True)
     df['Sex'].replace('other', 2, inplace=True)
     df['Embarked'].replace('S', 0, inplace=True)
     df['Embarked'].replace('C', 1, inplace=True)
     df['Embarked'].replace('Q', 2, inplace=True)
-    df['Title']=df['Title'].map({'Miss':0,'Mr': 1,'Mrs': 2,'Old':3,'Other':4})
+    df['Title'] = df['Title'].map(
+        {'Miss': 0, 'Mr': 1, 'Mrs': 2, 'Old': 3, 'Other': 4})
     return df
 # Handling Age feature
+
+
 def missingAge(df):
-    guess_ages = np.zeros((2,3))
+    guess_ages = np.zeros((2, 3))
     guess_ages
     for i in range(0, 2):
         for j in range(0, 3):
-            guess_df = df[(df['Sex'] == i) & (df['Pclass'] == j+1)]['Age'].dropna()
+            guess_df = df[(df['Sex'] == i) & (
+                df['Pclass'] == j+1)]['Age'].dropna()
             age_guess = guess_df.median()
             # Convert random age float to nearest .5 age
-            guess_ages[i,j] = int( age_guess/0.5 + 0.5 ) * 0.5
+            guess_ages[i, j] = int(age_guess/0.5 + 0.5) * 0.5
     for i in range(0, 2):
         for j in range(0, 3):
-            df.loc[ (df.Age.isnull()) & (df.Sex == i) & (df.Pclass == j+1),'Age'] = guess_ages[i,j]
+            df.loc[(df.Age.isnull()) & (df.Sex == i) & (
+                df.Pclass == j+1), 'Age'] = guess_ages[i, j]
     df['Age'] = df['Age'].astype(int)
     df['AgeBand'] = pd.cut(df['Age'], 5)
     # df[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean().sort_values(by='AgeBand', ascending=True)
@@ -83,12 +97,16 @@ def missingAge(df):
     df.loc[df['Age'] > 64, 'Age']
     return df
 # Combine Parch and SibSp - create feature 'IsAlone'
+
+
 def family(df):
     df['FamilySize'] = df['SibSp'] + df['Parch'] + 1
     for data in [df]:
         data['IsAlone'] = 0
         data.loc[data['FamilySize'] == 1, 'IsAlone'] = 1
 # Preprocessing
+
+
 def preprocessing(name: str, isTrain: int) -> int:
     df = get_df(name)
     df = name_proc(df)
@@ -102,35 +120,40 @@ def preprocessing(name: str, isTrain: int) -> int:
         data.loc[data['FamilySize'] > 1, 'IsAlone'] = 1
     if(isTrain):
         # temp = df['Survived']
-        df = df.drop(['Cabin', 'Ticket', 'Name', 'AgeBand', 'SibSp', 'Parch', 'FamilySize'], axis='columns')
+        df = df.drop(['Cabin', 'Ticket', 'Name', 'AgeBand',
+                     'SibSp', 'Parch', 'FamilySize'], axis='columns')
     else:
         # temp = df['PassengerId']
-        df = df.drop(['Name', 'Ticket', 'Cabin', 'AgeBand', 'SibSp', 'Parch', 'FamilySize'], axis='columns')
-    
+        df = df.drop(['Name', 'Ticket', 'Cabin', 'AgeBand',
+                     'SibSp', 'Parch', 'FamilySize'], axis='columns')
+
     try:
-        df.to_csv("/data/prep_data"+str(isTrain)+ ".csv")
+        df.to_csv("/data/prep_data"+str(isTrain) + ".csv")
         return 0
     except IOError as e:
         return e.errno
     # return temp, df
 
+
 '''TRAINING THE MODEL'''
 '''TESTING AND PREDICTIONS'''
+
+
 def modelling(name_train: str, name_test: str, mode: str) -> int:
     df_train = get_df(name_train)
     y_train = df_train['Survived']
     x_train = df_train.drop('Survived', axis='columns')
-    
-    if(mode=='dtc'):
+
+    if(mode == 'dtc'):
         dtc_model = DecisionTreeClassifier()
-    #Random Forest
-    elif(mode=='rfc'):
+    # Random Forest
+    elif(mode == 'rfc'):
         model = RandomForestClassifier()
-    #XGBoost
+    # XGBoost
     # elif(mode=='xgb'):
     #     model = XGBClassifier()
-    #BernoulliNB
-    elif(mode=='bnb'):
+    # BernoulliNB
+    elif(mode == 'bnb'):
         model = BernoulliNB()
 
     model.fit(x_train, y_train)
@@ -141,14 +164,15 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
     sample_submission = x_test.copy(deep=True)
     sample_submission['Survived'] = y_pred
     # sample_submission.head()
-    sample_submission.drop(sample_submission.columns.difference(['PassengerId','Survived']), 1, inplace=True)
-    
+    sample_submission.drop(sample_submission.columns.difference(
+        ['PassengerId', 'Survived']), 1, inplace=True)
+
     try:
-        sample_submission.to_csv("/data/prediction_" + str(mode) + ".csv", index= False)
+        sample_submission.to_csv(
+            "/data/prediction_" + str(mode) + ".csv", index=False)
         return 0
     except IOError as e:
         return e.errno
-
 
 
 # def test_pred(name: str):
@@ -159,9 +183,8 @@ def modelling(name_train: str, name_test: str, mode: str) -> int:
 #     x_test = test_data[['PassengerId', 'Pclass', 'Sex', 'Age', 'Fare', 'Embarked', 'Title', 'IsAlone']]
 #     #Predictions
 #     y_pred = model.predict(x_test)
-
 if __name__ == "__main__":
-   
+
     if len(sys.argv) != 2 or (sys.argv[1] != "nullwrite" and sys.argv[1] != "read" and sys.argv[1] != "preprocess" and sys.argv[1] != "model"):
         print(f"Usage: {sys.argv[0]} write|read")
         exit(1)
@@ -170,16 +193,18 @@ if __name__ == "__main__":
     command = sys.argv[1]
     if command == "read":
         # Write the file and print the error code
-        print(yaml.dump({ "code": read_file(os.environ["NAME"]) }))
+        print(yaml.dump({"code": read_file(os.environ["NAME"])}))
     elif command == "nullwrite":
         # Read the file and print the contents
-        print(yaml.dump({ "code": find_missing_values(os.environ["NAME"])}))
+        print(yaml.dump({"code": find_missing_values(os.environ["NAME"])}))
 
     elif command == "preprocess":
         # Read the file and print the contents
-        print(yaml.dump({ "code": preprocessing(os.environ["NAME"], os.environ["ISTRAIN"])}))
+        print(yaml.dump({"code": preprocessing(
+            os.environ["NAME"], os.environ["ISTRAIN"])}))
 
     elif command == "model":
         # Read the file and print the contents
-        print(yaml.dump({ "code": modelling(os.environ["NTRAIN"], os.environ["NTEST"], os.environ["MODE"])}))    
+        print(yaml.dump({"code": modelling(
+            os.environ["NTRAIN"], os.environ["NTEST"], os.environ["MODE"])}))
     # Done!
