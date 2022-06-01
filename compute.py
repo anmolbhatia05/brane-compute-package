@@ -23,7 +23,7 @@ def read_file(name: str) -> int:
     except IOError as e:
         return e.errno
 
-def get_df(path):
+def get_df(name):
     df = pd.read_csv(f"/data/{name}.csv")
     return df
 
