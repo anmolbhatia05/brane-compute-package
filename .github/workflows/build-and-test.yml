@@ -1,13 +1,6 @@
 name: Python package
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - develop
-      - dev
-      - master
+on: [workflow_dispatch, push]
 
 jobs:
   build-and-test:
