@@ -1,30 +1,39 @@
-name: compute_ml
+# Container.yml for this `brane_package` package
+# Basic information about this package
+name: brane_compute
 version: 1.0.0
 kind: ecu
 
+# Define the dependencies (as Ubuntu packages)
 dependencies:
    - python3
    - python3-pip
    - python3-yaml
 
+# Python packages required for this package
 install:
   - pip3 install pandas scikit-learn numpy
 
+# Defines the file to call whenever a function is called
 entrypoint:
+  # 'task' means the script should be run synchronously (i.e., blocking)
   kind: task
   exec: compute.py
 
+# These files are part of this package
 files:
   - compute.py
+  - /data/test.csv
+  - /data/train.csv
 
+# Defines the different brane function names 
 actions:
-  read:
+  shape:
     command:
       args:
-      - read
+      - shape
     input:
-    # Note: we now have two inputs for the write() function
-    - name: name
+    - name: path
       type: string
     output:
     - name: shape
@@ -35,13 +44,11 @@ actions:
       args:
       - preprocess
     input:
-    # Note: we now have two inputs for the write() function
     - name: name
       type: string
     - name: isTrain
       type: integer
     output:
-    # Note: its output is an integer!
     - name: code
       type: integer
 
@@ -50,7 +57,6 @@ actions:
       args:
       - model
     input:
-    # Note: we now have two inputs for the write() function
     - name: ntrain
       type: string
     - name: ntest
@@ -58,20 +64,18 @@ actions:
     - name: mode
       type: string
     output:
-    # Note: its output is an integer!
     - name: code
       type: integer
+  
   accuracy:
     command:
       args:
       - accuracy
     input:
-    # Note: we now have two inputs for the write() function
     - name: ntrain
       type: string
     - name: mode
       type: string
     output:
-    # Note: its output is an integer!
     - name: code
       type: string
