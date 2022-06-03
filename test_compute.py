@@ -21,9 +21,10 @@ def test_get_shape():
     assert compute.data_shape(test_input_path) == 'Shape is:(10, 12)'
 
 def test_get_model_accuracy():
-    # checks if the function get_model_accuracy returns accuracy as float number for given model
+    # checks if the function get_model_accuracy returns accuracy is less than 0 for given model
     test_input_path = './prep_data1.csv'
-    assert type(compute.get_model_accuracy(test_input_path, 'dtc')) == float
+    result = float(compute.get_model_accuracy(test_input_path, 'dtc'))
+    assert result <= 0
 
 def test_modelling():
     # checks if modelling functions works for given data dataset and model
