@@ -24,13 +24,14 @@ def test_get_model_accuracy():
     # checks if the function get_model_accuracy returns accuracy is less than 0 for given model
     test_input_path = './prep_data1.csv'
     result = float(compute.get_model_accuracy(test_input_path, 'dtc'))
-    assert result <= 0
+    value_assert = result < 1
+    assert value_assert
 
 def test_modelling():
-    # checks if modelling functions works for given data dataset and model
+    # checks if modelling functions works for preprocessed data dataset and model
     # ie. after training model and prediction returns 0
-    test_input_path = './test.csv'
-    train_data_input_path = './train.csv'
+    test_input_path = './prep_data0.csv'
+    train_data_input_path = './prep_data1.csv'
     # third parameter takes model alias here rfc stands for RandomForestClassifier
     result = compute.modelling(train_data_input_path, test_input_path, 'rfc')
     expected_output = 0
