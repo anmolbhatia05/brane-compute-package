@@ -20,7 +20,18 @@ def test_get_shape():
     test_input_path = './sample.csv'
     assert compute.data_shape(test_input_path) == 'Shape is:(10, 12)'
 
-def get_model_accuracy():
+def test_get_model_accuracy():
     # checks if the function get_model_accuracy returns accuracy as float number for given model
     test_input_path = './sample.csv'
     assert type(compute.get_model_accuracy(test_input_path, 'dtc')) == float
+
+def test_modelling():
+    # checks if modelling functions works for given data dataset and model
+    # ie. after training model and prediction returns 0
+    test_input_path = './test.csv'
+    train_data_input_path = './train.csv'
+    # third parameter takes model alias here rfc stands for RandomForestClassifier
+    result = modelling(train_data_input_path, test_input_path, 'rfc')
+    expected_output = 0
+    assert result == expected_output
+
