@@ -33,10 +33,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Install docker dependencies
+      - name: Setting up docker with buildx
         run: |
           docker buildx install
           docker buildx create --use
+      - name: Downloading brane repository and installing brane cli and instance 
+        run: |
+          git clone https://github.com/epi-project/brane.git && cd brane
+          chmod +x ./make.sh
+          ./make.sh cli --precompiled
+          ./make.sh instance --precompiled
       - name: Running tests
         run: |
           pytest -v
