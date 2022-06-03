@@ -31,7 +31,15 @@ def test_modelling():
     test_input_path = './test.csv'
     train_data_input_path = './train.csv'
     # third parameter takes model alias here rfc stands for RandomForestClassifier
-    result = modelling(train_data_input_path, test_input_path, 'rfc')
+    result = compute.modelling(train_data_input_path, test_input_path, 'rfc')
     expected_output = 0
     assert result == expected_output
 
+def test_preprocessing():
+    # checks if preprocessing function works correctly
+    # after completing all the steps of preprocessing, should return 0
+    train_data_input_path = './train.csv'
+    # second parameter is isTrain i.e. whether data provided is training dataset
+    result = compute.preprocessing(train_data_input_path, 1)
+    expected_output = 0
+    assert result == expected_output
