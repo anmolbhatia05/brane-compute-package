@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6612509.svg)](https://doi.org/10.5281/zenodo.6612509)
+
 # brane_compute
 
 ## What does this package do ? 
