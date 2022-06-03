@@ -41,7 +41,8 @@ jobs:
         run: |
           mkdir -p ~/bin
           sudo wget -O ~/bin/brane https://github.com/epi-project/brane/releases/download/v0.6.3/brane-linux-x86_64
-          echo 'export PATH=$PATH:$HOME/bin' >>~/.profile
+          sudo git update-index --chmod=+x ~/bin/brane
+          sudo echo 'export PATH=$PATH:$HOME/bin' >>~/.profile
           source ~/.profile
           echo $(brane --version)
       - name: Building brane compute package
