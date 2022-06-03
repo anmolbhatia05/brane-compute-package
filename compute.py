@@ -43,7 +43,7 @@ def data_shape(name: str) -> str:
         Output: Shape of the dataframe
     """
     try:
-        df = pd.read_csv(f'/data/{name}.csv')
+        df = pd.read_csv(name)
         shape = "Shape is:" + str(df.shape)
         return shape
     except IOError as e:
