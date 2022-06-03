@@ -1,4 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6612509.svg)](https://doi.org/10.5281/zenodo.6612509)
+[![CI](https://github.com/web-services-and-cloud-based-systems/brane-compute-package/actions/workflows/main.yml/badge.svg)](https://github.com/web-services-and-cloud-based-systems/brane-compute-package/actions/workflows/main.yml)
 
 # brane_compute
 
