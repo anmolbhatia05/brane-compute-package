@@ -5,5 +5,5 @@ import compute
 
 
 def test_get_df():
-    test_input_path = './data/sample.csv'
+    test_input_path = './sample.csv'
     assert type(compute.get_df(test_input_path)) == pd.DataFrame

@@ -23,22 +23,34 @@ entrypoint:
 # These files are part of this package
 files:
   - compute.py
-  - /data/test.csv
-  - /data/train.csv
+  - test.csv
+  - train.csv
 
 # Defines the different brane function names 
 actions:
+  # mounts the train.csv and test.csv in the /data folder
+  mount:
+    command:
+      args:
+      - mount
+    input:
+    output:
+    - name: result
+      type: string
+
+  # tells the shape of the dataframe read for the respective .csv files
   shape:
     command:
       args:
       - shape
     input:
-    - name: path
+    - name: name
       type: string
     output:
     - name: shape
       type: string
 
+  # preprocesses the data(check compute.py file for more details)
   preprocess:
     command:
       args:
@@ -52,6 +64,7 @@ actions:
     - name: code
       type: integer
 
+  # trains the model on the basis of the mode(model name provided)
   model:
     command:
       args:
@@ -67,6 +80,7 @@ actions:
     - name: code
       type: integer
   
+  # returns the accuracy of the model
   accuracy:
     command:
       args:
@@ -77,5 +91,5 @@ actions:
     - name: mode
       type: string
     output:
-    - name: code
+    - name: accuracy
       type: string

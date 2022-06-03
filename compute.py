@@ -4,6 +4,7 @@
 import os
 import sys
 import yaml
+import shutil
 
 # importing data analysis and ml packages
 import pandas as pd
@@ -19,15 +20,30 @@ from sklearn.model_selection import cross_val_score
 # If a function has type annotation, then it is a brane/external function or else it's just a helper function
 
 
-def data_shape(path: str) -> str:
+def mount() -> str:
+    """
+        Function that mounts the train.csv and test.csv files in this brane package in the /data folder
+        Function type: Brane/external function that will be run in a container runtime
+        Input: None
+        Output: String (done/error)
+    """
+    try:
+        shutil.move("./train.csv", "/data")
+        shutil.move("./test.csv", "/data")
+        return "done"
+    except IOError:
+        return "error"
+
+
+def data_shape(name: str) -> str:
     """
         Function that returns the shape of the dataframe after reading the data from a file.
         Function type: Brane/external function that will be run in a container runtime
-        Input: path of the file (the file should be placed under /data)
+        Input: name of the file (the file should be placed under /data - train or test)
         Output: Shape of the dataframe
     """
     try:
-        df = pd.read_csv(path)
+        df = pd.read_csv(f'/data/{name}.csv')
         shape = "Shape is:" + str(df.shape)
         return shape
     except IOError as e:
@@ -237,15 +253,20 @@ def get_model_accuracy(path_train: str, mode: str) -> str:
 # The entrypoint of the script
 if __name__ == "__main__":
     # Make sure that at least one argument is given, that is either - 'shape' or 'preprocess' or 'model' or 'accuracy'
-    if len(sys.argv) != 2 or (sys.argv[1] != "shape" and sys.argv[1] != "preprocess" and sys.argv[1] != "model" and sys.argv[1] != "accuracy"):
-        print(f"Usage: {sys.argv[0]} write|read")
+    if len(sys.argv) != 2 or (sys.argv[1] != "shape" and sys.argv[1] != "preprocess" and sys.argv[1] != "model" and sys.argv[1] != "accuracy" and sys.argv[1] != "mount"):
         exit(1)
 
     # If it checks out, call the appropriate function
     command = sys.argv[1]
-    if command == "shape":
+
+    if command == "mount":
         # Print the result with the YAML package
-        print(yaml.dump({"shape": data_shape(os.environ["PATH"])}))
+        print(yaml.dump({"result": mount()}))
+
+    elif command == "shape":
+        # Print the result with the YAML package
+        print(yaml.dump({"shape": data_shape(os.environ["NAME"])}))
+
     elif command == "preprocess":
         # Print the result with the YAML package
         print(yaml.dump({"code": preprocessing(
@@ -258,5 +279,5 @@ if __name__ == "__main__":
 
     elif command == "accuracy":
         # Print the result with the YAML package
-        print(yaml.dump({"code": get_model_accuracy(
+        print(yaml.dump({"accuracy": get_model_accuracy(
             os.environ["NTRAIN"], os.environ["MODE"])}))
