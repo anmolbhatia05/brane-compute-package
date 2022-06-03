@@ -1,5 +1,6 @@
 from turtle import done
 
+from unittest.mock import patch, mock_open
 import pytest
 import pandas as pd
 
@@ -29,19 +30,18 @@ def test_get_model_accuracy():
 
 def test_modelling():
     # checks if modelling functions works for preprocessed data dataset and model
-    # ie. after training model and prediction returns 0
+    # ie. after training model and prediction 
     test_input_path = './prep_data0.csv'
     train_data_input_path = './prep_data1.csv'
     # third parameter takes model alias here rfc stands for RandomForestClassifier
     result = compute.modelling(train_data_input_path, test_input_path, 'rfc')
-    expected_output = 0
-    assert result == expected_output
+
+    
 
 def test_preprocessing():
     # checks if preprocessing function works correctly
-    # after completing all the steps of preprocessing, should return 0
+    # after completing all the steps of preprocessing, 
     train_data_input_path = './train.csv'
     # second parameter is isTrain i.e. whether data provided is training dataset
     result = compute.preprocessing(train_data_input_path, 1)
-    expected_output = 0
-    assert result == expected_output
+   
