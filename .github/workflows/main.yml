@@ -39,11 +39,11 @@ jobs:
           docker buildx create --use
       - name: Downloading brane repository and installing brane cli and instance 
         run: |
-          git clone https://github.com/web-services-and-cloud-based-systems/brane.git && cd brane
-          sudo wget -O ./brane https://github.com/epi-project/brane/releases/download/v0.6.3/brane-linux-x86_64
-          export PATH=$PATH:$(pwd)
-          chmod +x ./make.sh
-          ./make.sh start-instance --precompiled
+          mkdir -p ~/bin
+          sudo wget -O ~/bin/brane https://github.com/epi-project/brane/releases/download/v0.6.3/brane-linux-x86_64
+          echo 'export PATH=$PATH:$HOME/bin' >>~/.profile
+          source ~/.profile
+          echo $(brane --version)
       - name: Building brane compute package
         run: |
           brane build ./container.yml
