@@ -41,7 +41,8 @@ jobs:
         run: |
           git clone https://github.com/web-services-and-cloud-based-systems/brane.git && cd brane
           chmod +x ./make.sh
-          sudo ./make.sh cli --precompiled || ./make.sh start-instance --precompiled
+          ./make.sh start-instance --precompiled
+          ./make.sh cli
       - name: Building brane compute package
         run: |
           brane build ./container.yml
