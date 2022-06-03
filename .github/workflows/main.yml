@@ -44,9 +44,9 @@ jobs:
           sudo chmod +x ~/bin/brane
           sudo echo 'export PATH=$PATH:$HOME/bin' >>~/.profile
           source ~/.profile
-          echo $(brane --version)
       - name: Building brane compute package
         run: |
+          source ~/.profile
           brane build ./container.yml
       - name: Running tests
         run: |
