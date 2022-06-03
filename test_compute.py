@@ -22,7 +22,7 @@ def test_get_shape():
 
 def test_get_model_accuracy():
     # checks if the function get_model_accuracy returns accuracy as float number for given model
-    test_input_path = './sample.csv'
+    test_input_path = './prep_data1.csv'
     assert type(compute.get_model_accuracy(test_input_path, 'dtc')) == float
 
 def test_modelling():
