@@ -29,10 +29,18 @@ jobs:
           cache: 'pip'
           # Optional - x64 or x86 architecture, defaults to x64
           architecture: 'x64'
-      - name: Install dependencies
+      - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Install docker dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install \
+              ca-certificates \
+              curl \
+              gnupg \
+              lsb-release
       - name: Running tests
         run: |
           pytest -v

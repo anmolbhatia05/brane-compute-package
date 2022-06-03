@@ -252,7 +252,7 @@ def get_model_accuracy(path_train: str, mode: str) -> str:
 
 # The entrypoint of the script
 if __name__ == "__main__":
-    # Make sure that at least one argument is given, that is either - 'shape' or 'preprocess' or 'model' or 'accuracy'
+    # Make sure that at least one argument is given, that is either - 'shape' or 'preprocess' or 'model' or 'accuracy' or 'mount'
     if len(sys.argv) != 2 or (sys.argv[1] != "shape" and sys.argv[1] != "preprocess" and sys.argv[1] != "model" and sys.argv[1] != "accuracy" and sys.argv[1] != "mount"):
         exit(1)
 
