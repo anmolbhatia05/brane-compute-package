@@ -39,9 +39,9 @@ jobs:
           docker buildx create --use
       - name: Downloading brane repository and installing brane cli and instance 
         run: |
-          https://github.com/web-services-and-cloud-based-systems/brane.git && cd brane
+          git clone https://github.com/web-services-and-cloud-based-systems/brane.git && cd brane
           chmod +x ./make.sh
-          ./make.sh start-instance --precompiled
+          sudo ./make.sh cli --precompiled || ./make.sh start-instance --precompiled
       - name: Running tests
         run: |
           pytest -v
